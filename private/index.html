@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Control Remoto ESP32</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-container">
+    <div class="cyber-border"></div>
+    
+    <header class="app-header">
+      <div class="header-content">
+        <div class="logo-container">
+          <i class="fas fa-robot logo-icon"></i>
+          <h1>Control <span class="highlight">ESP32</span></h1>
+        </div>
+        <p class="subtitle">Interfaz de Control Mech Robotix</p>
+      </div>
+      <div class="header-decoration"></div>
+    </header>
+
+    <div class="user-panel">
+      <div class="user-info">
+        <p><i class="fas fa-user"></i> <strong>Usuario:</strong> <span id="userName">Cargando...</span></p>
+        <p><i class="fas fa-envelope"></i> <strong>Correo:</strong> <span id="userEmail">Cargando...</span></p>
+      </div>
+      <button id="logoutBtn" class="logout-btn">
+        <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+      </button>
+    </div>
+
+    <div id="helpModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2><i class="fas fa-question-circle"></i> Ayuda - Control del Robot</h2>
+          <span class="close-modal">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="help-section">
+            <h3><i class="fas fa-gamepad"></i> Controles Direccionales</h3>
+            <ul>
+              <li><strong>Flecha Arriba (W):</strong> Mover el robot hacia adelante</li>
+              <li><strong>Flecha Izquierda (A):</strong> Girar el robot a la izquierda</li>
+              <li><strong>Flecha Derecha (D):</strong> Girar el robot a la derecha</li>
+              <li><strong>Flecha Abajo (S):</strong> Mover el robot hacia atrás</li>
+              <li><strong>Botón Central:</strong> Activar el claxon del robot</li>
+            </ul>
+          </div>
+          
+          <div class="help-section">
+            <h3><i class="fas fa-tachometer-alt"></i> Control de Velocidad</h3>
+            <ul>
+              <li><strong>Lento (V):</strong> 33% de velocidad - Ideal para espacios reducidos</li>
+              <li><strong>Medio (B):</strong> 66% de velocidad - Velocidad estándar</li>
+              <li><strong>Rápido (N):</strong> 100% de velocidad - Máxima potencia</li>
+            </ul>
+          </div>
+          
+          <div class="help-section">
+            <h3><i class="fas fa-video"></i> Vista de Cámara</h3>
+            <ul>
+              <li>Transmisión en tiempo real desde la cámara del robot</li>
+              <li><strong>Modo Automático:</strong> El robot navegará de forma autónoma</li>
+              <li><strong>Pantalla Completa:</strong> Para una mejor visualización</li>
+            </ul>
+          </div>
+          
+          <div class="help-section">
+            <h3><i class="fas fa-lightbulb"></i> Consejos</h3>
+            <ul>
+              <li>Mantén presionado un botón direccional para movimiento continuo</li>
+              <li>Usa velocidades bajas en espacios con obstáculos</li>
+              <li>El registro del sistema muestra el estado y eventos importantes</li>
+            </ul>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cyber close-modal-btn">
+            <i class="fas fa-check"></i> Entendido
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <main class="app-content">
+      <section class="connection-section card">
+        <div class="card-header">
+          <div class="card-title">
+            <i class="fas fa-satellite-dish"></i>
+            <h2>Conexión del Dispositivo</h2>
+          </div>
+          <div class="card-buttons">
+            <button class="btn-icon" id="refreshBtn" title="Buscar dispositivos">
+              <i class="fas fa-sync-alt"></i>
+            </button>
+            <button class="btn-icon" id="settingsBtn" title="Configuración">
+              <i class="fas fa-cog"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="connection-grid">
+            <div class="connection-controls">
+              <button id="connectBtn" class="btn btn-primary btn-glow btn-3d">
+                <i class="fas fa-plug"></i> Conectar
+              </button>
+              <button id="disconnectBtn" class="btn btn-secondary btn-3d" disabled>
+                <i class="fas fa-power-off"></i> Desconectar
+              </button>
+            </div>
+
+            <div id="connectionStatus" class="status disconnected">
+              <div class="status-content">
+                <span class="status-icon"><i class="fas fa-unlink"></i></span>
+                <span class="status-text">Desconectado</span>
+                <span class="status-detail">Buscando dispositivo ESP32...</span>
+              </div>
+              <div class="signal-strength">
+                <div class="signal-bar"></div>
+                <div class="signal-bar"></div>
+                <div class="signal-bar"></div>
+                <div class="signal-bar"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="camera-section card">
+        <div class="card-header">
+          <div class="card-title">
+            <i class="fas fa-video"></i>
+            <h2>Vista de la Cámara</h2>
+          </div>
+          <div class="card-buttons">
+            <button class="btn-icon" id="fullscreenBtn" title="Pantalla completa">
+              <i class="fas fa-expand"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="camera-container">
+            <canvas id="videoCanvas" width="640" height="480"></canvas>
+          </div>
+          <div class="camera-controls">
+            <button id="autoModeBtn" class="btn-cyber">
+              <i class="fas fa-robot"></i> 
+              <span>Modo Automático</span>
+              <span class="pulse-dot"></span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sección de Control -->
+      <section class="control-section card">
+        <div class="card-header">
+          <div class="card-title">
+            <i class="fas fa-gamepad"></i>
+            <h2>Control Direccional</h2>
+          </div>
+          <div class="card-buttons">
+            <button class="btn-icon" id="helpBtn" title="Ayuda">
+              <i class="fas fa-question-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="control-grid">
+            <div class="joystick-container">
+              <div class="joystick-bg"></div>
+              <div class="button btn-direction" id="btnUp">
+                <i class="fas fa-arrow-up"></i>
+                <span class="tooltip">Adelante (W)</span>
+              </div>
+              <div class="button btn-direction" id="btnLeft">
+                <i class="fas fa-arrow-left"></i>
+                <span class="tooltip">Izquierda (A)</span>
+              </div>
+              <div class="button btn-direction" id="btnRight">
+                <i class="fas fa-arrow-right"></i>
+                <span class="tooltip">Derecha (D)</span>
+              </div>
+              <div class="button btn-direction" id="btnDown">
+                <i class="fas fa-arrow-down"></i>
+                <span class="tooltip">Atrás (S)</span>
+              </div>
+              <div class="joystick-center">
+                <button id="btnHorn" class="horn-btn btn-3d">
+                  <i class="fas fa-bullhorn"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sección de Velocidad -->
+      <section class="speed-section card">
+        <div class="card-header">
+          <div class="card-title">
+            <i class="fas fa-tachometer-alt"></i>
+            <h2>Control de Velocidad</h2>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="speed-control">
+            <div class="speed-visualization">
+              <div class="speed-indicator">
+                <div class="speed-level" data-speed="slow"></div>
+                <div class="speed-level" data-speed="medium"></div>
+                <div class="speed-level" data-speed="fast"></div>
+                <div class="speed-marker"></div>
+              </div>
+              <div class="speed-labels">
+                <span>33%</span>
+                <span>66%</span>
+                <span>100%</span>
+              </div>
+            </div>
+            
+            <div class="speed-buttons">
+              <button id="btnSlow" class="speed-btn btn-3d" data-speed="V">
+                <i class="fas fa-turtle"></i>
+                <span>Lento</span>
+                <span class="shortcut">V</span>
+              </button>
+              <button id="btnMedium" class="speed-btn btn-3d active" data-speed="W">
+                <i class="fas fa-walking"></i>
+                <span>Medio</span>
+                <span class="shortcut">B</span>
+              </button>
+              <button id="btnFast" class="speed-btn btn-3d" data-speed="X">
+                <i class="fas fa-running"></i>
+                <span>Rápido</span>
+                <span class="shortcut">N</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="log-section card">
+        <div class="card-header">
+          <div class="card-title">
+            <i class="fas fa-terminal"></i>
+            <h2>Registro del Sistema</h2>
+          </div>
+          <div class="card-buttons">
+            <button class="btn-icon" id="clearLogBtn" title="Limpiar registro">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div id="log" class="log-container">
+            <div class="log-entry info">
+              <span class="timestamp">[10:45:23]</span> Sistema inicializado
+            </div>
+            <div class="log-entry warning">
+              <span class="timestamp">[10:45:25]</span> Buscando dispositivo ESP32...
+            </div>
+            <div class="log-entry debug">
+              <span class="timestamp">[10:45:28]</span> Bluetooth activado
+            </div>
+            <div class="log-entry success">
+              <span class="timestamp">[10:45:31]</span> Interfaz de usuario cargada correctamente
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <div class="footer-content">
+        <div class="version">v2.3.0 | Control Remoto ESP32</div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/gh/phoboslab/jsmpeg/jsmpeg.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const canvas = document.getElementById('videoCanvas');
+      if (canvas) {
+        const player = new JSMpeg.Player('wss://05512a348e91.ngrok-free.app/stream', {
+          canvas: canvas,
+          audio: false,
+          autoplay: true,
+          loop: true,
+          videoBufferSize: 256 * 1024, 
+          preserveDrawingBuffer: false,
+          disableGl: false
+        });
+      }
+
+      const helpModal = document.getElementById('helpModal');
+      const helpBtn = document.getElementById('helpBtn');
+      const closeModal = document.querySelector('.close-modal');
+      const closeModalBtn = document.querySelector('.close-modal-btn');
+
+      if (helpBtn) {
+        helpBtn.addEventListener('click', () => {
+          helpModal.style.display = 'flex';
+          addLogEntry('Ayuda abierta', 'info');
+        });
+      }
+
+      if (closeModal) {
+        closeModal.addEventListener('click', () => {
+          helpModal.style.display = 'none';
+        });
+      }
+
+      if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', () => {
+          helpModal.style.display = 'none';
+        });
+      }
+
+      window.addEventListener('click', (event) => {
+        if (event.target === helpModal) {
+          helpModal.style.display = 'none';
+        }
+      });
+
+      const hornBtn = document.getElementById('btnHorn');
+      if (hornBtn) {
+        hornBtn.addEventListener('click', () => {
+          addLogEntry('Claxon activado', 'info');
+        });
+      }
+
+      const clearLogBtn = document.getElementById('clearLogBtn');
+      if (clearLogBtn) {
+        clearLogBtn.addEventListener('click', () => {
+          document.getElementById('log').innerHTML = '';
+          addLogEntry('Registro limpiado', 'warning');
+        });
+      }
+
+      async function fetchUserInfo() {
+        try {
+          const res = await fetch('/api/user', { credentials: 'include' });
+          const data = await res.json();
+          document.getElementById('userName').textContent = data.nombre;
+          document.getElementById('userEmail').textContent = data.email;
+          addLogEntry('Sesión iniciada como ' + data.nombre, 'info');
+        } catch (err) {
+          console.error('Error al obtener usuario:', err);
+          window.location.href = '/login.html';
+        }
+      }
+
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+          const res = await fetch('/logout');
+          const data = await res.json();
+          addLogEntry('Sesión cerrada', 'info');
+          setTimeout(() => {
+            window.location.href = data.redirect || '/login.html';
+          }, 1000);
+        });
+      }
+
+      const fullscreenBtn = document.getElementById('fullscreenBtn');
+      if (fullscreenBtn && canvas) {
+        fullscreenBtn.addEventListener('click', () => {
+          if (canvas.requestFullscreen) canvas.requestFullscreen();
+        });
+      }
+
+      fetchUserInfo();
+    });
+
+    function addLogEntry(message, type = 'info') {
+      const log = document.getElementById('log');
+      if (!log) return;
+      const timestamp = new Date().toTimeString().substring(0, 8);
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      entry.innerHTML = `<span class="timestamp">[${timestamp}]</span> ${message}`;
+      log.appendChild(entry);
+      log.scrollTop = log.scrollHeight;
+    }
+  </script>
+
+  <script src="script.js" defer></script>
+</body>
+</html>

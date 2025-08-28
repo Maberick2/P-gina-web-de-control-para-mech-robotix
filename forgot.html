@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recuperar contraseña</title>
+  <link rel="stylesheet" href="login.css">
+</head>
+<body>
+  <div class="auth-container">
+    <div class="form-container">
+      <div class="form-header">
+        <h2>Recuperar contraseña</h2>
+        <p>Ingresa tu correo y te llevaremos a la página para restablecerla</p>
+      </div>
+
+      <form id="forgotForm" class="auth-form" aria-label="Formulario de recuperación">
+        <div class="form-group">
+          <label for="email">Correo electrónico</label>
+          <input type="email" id="email" required>
+        </div>
+
+        <button type="submit" class="btn-primary">Continuar</button>
+
+        <div class="form-footer">
+          <p>¿Ya la recordaste? <a href="login.html">Volver al login</a></p>
+        </div>
+      </form>
+        <script>
+            document.getElementById('forgotForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('email').value.trim();
+
+                try {
+                const res = await fetch('/api/forgot-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    alert(data.message || 'No fue posible procesar la solicitud.');
+                    return;
+                }
+
+                if (data.redirect) {
+                    window.location.href = data.redirect;
+                    return;
+                }
+
+                alert(data.message || 'Sigue los pasos para restablecer.');
+                } catch (err) {
+                alert('No se pudo procesar la solicitud. Intenta de nuevo.');
+                }
+            });
+        </script>
+    </div>
+  </div>
+</body>
+</html>

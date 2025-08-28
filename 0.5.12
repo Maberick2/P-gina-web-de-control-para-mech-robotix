@@ -1,0 +1,8 @@
+Defaulting to user installation because normal site-packages is not writeable
+Collecting lap
+  Downloading lap-0.5.12-cp312-cp312-win_amd64.whl.metadata (6.3 kB)
+Requirement already satisfied: numpy>=1.21.6 in c:\users\rrami\appdata\local\packages\pythonsoftwarefoundation.python.3.12_qbz5n2kfra8p0\localcache\local-packages\python312\site-packages (from lap) (2.2.6)
+Downloading lap-0.5.12-cp312-cp312-win_amd64.whl (1.5 MB)
+   ---------------------------------------- 1.5/1.5 MB 3.9 MB/s eta 0:00:00
+Installing collected packages: lap
+Successfully installed lap-0.5.12

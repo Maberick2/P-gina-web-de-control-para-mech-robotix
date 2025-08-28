@@ -1,0 +1,25 @@
+{
+  "name": "mech-robotix",
+  "version": "1.0.0",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^5.1.0",
+    "express-ws": "^5.0.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.16.2",
+    "node-rtsp-stream": "^0.0.9",
+    "ws": "^8.18.3"
+  },
+  "description": ""
+}
