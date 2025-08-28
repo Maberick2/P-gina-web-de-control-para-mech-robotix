@@ -1,0 +1,46 @@
+# Node / JS
+node_modules/
+dist/
+build/
+.cache/
+.next/
+out/
+coverage/
+*.log
+npm-debug.log*
+yarn-error.log*
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# FFmpeg / streaming temporales
+*.ts
+*.m3u8
+tmp/
+temp/
+
+# Videos y binarios pesados 
+*.mp4
+*.mov
+*.mkv
+*.avi
+*.zip
+*.rar
+*.7z
+*.exe
+*.dll
+
+# IDE / SO
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Env / secretos
+.env
+.env.*
+.env
+*.rar
+*.rar
